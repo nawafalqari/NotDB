@@ -1,2 +1,3 @@
 # NotDB
-NotDB is a database that uses PYON
+Viewer for NotDB Databases
+Still on beta version.
