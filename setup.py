@@ -9,8 +9,8 @@ setup(
     name='notdb',
     packages=find_packages(),
     install_requires=[
-        'pyonr',
-        'bcrypt'
+        'pyonr>=1.0.0',
+        'bcrypt>=3.2.0'
     ],
     version=v,
     description='NotDB is a PYON-like database',

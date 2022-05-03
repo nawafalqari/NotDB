@@ -38,6 +38,8 @@ class NotDBClient:
          '__docs': []
       }
 
+      if self.__read.readfile == None:
+         self.__read.write(pyonr.dumps(self.__schema))
       if self.__read.readfile.get('__password'):
          if not password:
             password = ''
