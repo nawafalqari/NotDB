@@ -10,9 +10,14 @@ def get_password():
    password = hashpw(getpass('Password: ').encode('utf-8'), gensalt())
    return password
 
+def main():
+   pass
+
 parser = argparse.ArgumentParser('NotDB', 'notdb [filename]', f'NotDB command line tool v{v}', )
+
 parser.add_argument('filename', nargs=1, type=str, help='Create a database with the given filename', metavar='filename')
 parser.add_argument('-p', '--password', action='store_true', help='Secure the database with a password')
+parser.add_argument('-v', '--version', action='version', version=f'notdb {v}', help='Show the notdb_viewer version')
 
 args = parser.parse_args()
 
