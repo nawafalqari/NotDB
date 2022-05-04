@@ -15,6 +15,8 @@
     - [appendOne And appendMany](#appendone-appendmany)
     - [removeOne And removeMany](#removeone-removemany)
     - [updateOne And updateMany](#updateone-updatemany)
+      - [SET](#set)
+      - [UNSET](#unset)
 - [View Your Data](#view-your-data)
 - [Links](#links)
 
