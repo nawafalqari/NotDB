@@ -94,3 +94,14 @@ db.updateOne({'name': 'Nawaf'}, {
 ```python
 db.updateMany() # is still under development
 ```
+
+## View Your Data
+Best way to see your db data is by using [notdb_viewer](https://github.com/nawafalqari/NotDB_Viewer)
+
+* [NotDB Viewer Docs](https://github.com/nawafalqari/NotDB_Viewer#readme)
+
+![NotDB Viewer Image](./images/notdb_viewer_example.png)
+
+## Links
+* [Discord](https://discord.gg/Az8McWNAcg)
+* [Twitter](https://twitter.com/nawafalqari2)
