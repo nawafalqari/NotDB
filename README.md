@@ -5,7 +5,14 @@
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [How to use](#how-to-use)
-    - [get And getOne](#)
+    - [DB Info](#db-info)
+    - [get And getOne](#get-getone)
+    - [appendOne And appendMany](#appendone-appendmany)
+    - [removeOne And appendMany](#removeone-removemany)
+    - [updateOne And updateMany](#updateone-updatemany)
+- [View Your Data](#view-your-data)
+- [Links](#links)
+
 
 ## Installation
 #### PIP
@@ -42,7 +49,7 @@ db.host # will return db host (path)
 db.get({'admin': True}) # will return a list of documents that match the filter
 db.getOne({'admin': True}) # will return the "first" element that match the filter
 ```
-### `append`, `appendMany`
+### `appendOne`, `appendMany`
 ```python
 db.appendMany([{'name': 'Nawaf'} for i in range(10)])
 # this will append "{'name': 'Nawaf'}" to the database 10 times
@@ -50,7 +57,16 @@ db.appendMany([{'name': 'Nawaf'} for i in range(10)])
 db.appendOne({'name': 'Nawaf'})
 # this will append "{'name': 'Nawaf'}" to the database 1 time
 ```
-### `removeMany`, `removeOne`
+### `removeOne`, `removeMany`
+```python
+db.appendMany([{'name': 'Nawaf'} for i in range(10)])
+# appending "{'name': 'Nawaf'}" 10 times
+
+db.removeOne({'name': 'Nawaf'})
+# this will just remove the first "{'name': 'Nawaf'}"
+
+print(db.documents) # 9
+```
 ```python
 db.appendMany([{'name': 'Nawaf'} for i in range(10)])
 # appending "{'name': 'Nawaf'}" 10 times
@@ -60,15 +76,6 @@ db.removeMany({'name': 'Nawaf'})
 
 db.removeMany({})
 # This will remove every thing from the database
-```
-```python
-db.appendMany([{'name': 'Nawaf'} for i in range(10)])
-# appending "{'name': 'Nawaf'}" 10 times
-
-db.removeOne({'name': 'Nawaf'})
-# this will just remove the first "{'name': 'Nawaf'}"
-
-print(db.documents) # 9
 ```
 ### `updateOne`, `updateMany`
 NotDB have 2 types of updates `SET` and `UNSET`
