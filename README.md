@@ -13,7 +13,7 @@
     - [DB Info](#db-info)
     - [get And getOne](#get-getone)
     - [appendOne And appendMany](#appendone-appendmany)
-    - [removeOne And appendMany](#removeone-removemany)
+    - [removeOne And removeMany](#removeone-removemany)
     - [updateOne And updateMany](#updateone-updatemany)
 - [View Your Data](#view-your-data)
 - [Links](#links)
