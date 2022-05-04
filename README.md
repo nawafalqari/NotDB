@@ -82,6 +82,7 @@ NotDB have 2 types of updates `SET` and `UNSET`
 
 <small>I will add more in the future😅</small>
 
+#### SET
 ```python
 db.appendOne({'name': 'Nawaf'})
 # adding "{'name': 'Nawaf'}" to the db
@@ -98,6 +99,16 @@ db.updateOne({'name': 'Nawaf'}, {
    'programmingLangs': ['Python', 'JavaScript', 'C++']
 }, notdb.SET)
 ```
+#### UNSET
+```python
+db.appendOne({'name': 'Nawaf', 'age': 15})
+# adding "{'name': 'Nawaf'}" to the db
+
+db.updateOne({'name': 'Nawaf'}, 'age', notdb.UNSET)
+# Since we are unsetting a key we don't need its value
+# That's why we specified "age" for the update not {'age': 15}
+```
+
 ```python
 db.updateMany() # is still under development
 ```
