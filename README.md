@@ -1,5 +1,10 @@
+<p align="center">
+   <img src="./images/banner_transparent.png" alt="Logo Transparnet">
+</p>
+
 # NotDB
 **NotDB** is an open source document-oriented database that uses [PYON](https://github.com/nawafalqari/pyon)-like documents
+
 
 ## Table of Contents
 - [Installation](#installation)
