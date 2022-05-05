@@ -1,12 +1,12 @@
 import os
 import pyonr
-from bcrypt import checkpw
+from bcrypt import checkpw as _checkpw
+from dataclasses import dataclass
 
 from .filesHandler import find_ndb_files
 from .errors import *
+from . import UTypes
 
-SET = 1000
-UNSET = 1001
 
 def checkTypes(l:list, type):
    '''
@@ -28,7 +28,7 @@ class NotDBClient:
       if not host:
          self.__host = find_ndb_files('.')
          if isinstance(self.__host, list):
-            raise InvalidHost(host)
+            raise InvalidHostError(host)
       else:
          self.__host = host
 
@@ -43,10 +43,10 @@ class NotDBClient:
       if self.__read.readfile.get('__password'):
          if not password:
             password = ''
-         if isinstance(password, str) and not checkpw(password.encode('utf-8'), self.__read.readfile['__password']):
-            raise WrongPassword()
-         elif isinstance(password, bytes) and not checkpw(password, self.__read.readfile['__password']):
-            raise WrongPassword()
+         if isinstance(password, str) and not _checkpw(password.encode('utf-8'), self.__read.readfile['__password']):
+            raise WrongPasswordError()
+         elif isinstance(password, bytes) and not _checkpw(password, self.__read.readfile['__password']):
+            raise WrongPasswordError()
       
    # file data
    @property
@@ -146,9 +146,9 @@ class NotDBClient:
       _r.write(_fd)
 
    def updateOne(self, _filter:dict, update:dict, type:str):
-      if type == SET: # "SET" an item in a document
+      if type == UTypes.SET: # "SET" an item in a document
          if len(update) != 1:
-            raise InvalidDict(update)
+            raise InvalidDictError(update)
          _fullDoc = self.getOne(_filter)
          _r = self.__read
          _fd = _r.readfile
@@ -160,8 +160,7 @@ class NotDBClient:
          _r.write(_fd)
          return None
 
-
-      if type == UNSET: # "UNSET" an item from a document
+      if type == UTypes.UNSET: # "UNSET" an item from a document
          _fullDoc = self.getOne(_filter)
          _r = self.__read
          _fd = _r.readfile
@@ -173,7 +172,7 @@ class NotDBClient:
             _r.write(_fd)
          elif isinstance(update, dict):
             if len(update) != 1:
-               raise InvalidDict(update)
+               raise InvalidDictError(update)
             del _docs[i][list(update.keys())[0]]
             _r.write(_fd)
 
@@ -189,3 +188,12 @@ class NotDBClient:
       self.removeOne(_filter)
 
       return f
+
+class NotDBCloudClient:
+   '''
+
+   
+   '''
+   def __init__(self, host, password=None):
+      pass
+   

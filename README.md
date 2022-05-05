@@ -5,6 +5,9 @@
 # NotDB
 **NotDB** is an open source document-oriented database that uses [PYON](https://github.com/nawafalqari/pyon)-like documents
 
+[![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/Nawafalqari2)
+[![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/NawafHAlqari)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/Az8McWNAcg)
 
 ## Table of Contents
 - [Installation](#installation)
@@ -89,6 +92,13 @@ NotDB have 2 types of updates `SET` and `UNSET`
 
 <small>I will add more in the future😅</small>
 
+#### How to acccess update types
+```python
+import notdb
+
+dir(notdb.UTypes) # ['SET', 'UNSET', ...]
+```
+
 #### SET
 ```python
 db.appendOne({'name': 'Nawaf'})
@@ -99,19 +109,19 @@ db.appendOne({'name': 'Nawaf'})
 # last parameter is "type"     -> update type: SET or UNSET
 db.updateOne({'name': 'Nawaf'}, {
    'age': 15
-}, notdb.SET)
+}, notdb.UTypes.SET)
 # Easy, right?
 
 db.updateOne({'name': 'Nawaf'}, {
    'programmingLangs': ['Python', 'JavaScript', 'C++']
-}, notdb.SET)
+}, notdb.UTypes.SET)
 ```
 #### UNSET
 ```python
 db.appendOne({'name': 'Nawaf', 'age': 15})
 # adding "{'name': 'Nawaf'}" to the db
 
-db.updateOne({'name': 'Nawaf'}, 'age', notdb.UNSET)
+db.updateOne({'name': 'Nawaf'}, 'age', notdb.UTypes.UNSET)
 # Since we are unsetting a key we don't need its value
 # That's why we specified "age" for the update not {'age': 15}
 ```
@@ -126,7 +136,3 @@ Best way to see your db data is by using [notdb_viewer](https://github.com/nawaf
 * [NotDB Viewer Docs](https://github.com/nawafalqari/NotDB_Viewer#readme)
 
 ![NotDB Viewer Image](./images/notdb_viewer_example.png)
-
-## Links
-* [Discord](https://discord.gg/Az8McWNAcg)
-* [Twitter](https://twitter.com/nawafalqari2)

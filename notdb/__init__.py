@@ -4,6 +4,8 @@ NotDB is an open source document-oriented database that uses PYON-like documents
 
 Developed by Nawaf Alqari in 2022
 
+[Documentation](https://github.com/nawafalqari/NotDB)
+
 Example:
 First you need to make your database
 you can make it manually by just creating a `.ndb` file
@@ -19,6 +21,9 @@ $ notdb [filename] --password
 
 '''
 
-from .notdb import *
+from .ndb import NotDBClient, UTypes, checkTypes
+from .errors import *
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
+__all__ = ['InvalidDictError', 'InvalidHostError', 'NotDBClient', 'UTypes', 'WrongPasswordError',
+            'checkTypes', '__version__']

@@ -1,3 +1,14 @@
+'''
+NotDB
+-----
+
+NotDB is an open source document-oriented database that uses PYON-like documents
+
+    $ pip install notdb
+
+Full documentation is avaliable on `Github <https://github.com/nawafalqari/NotDB#readme>`_.
+'''
+
 from setuptools import setup, find_packages
 import codecs
 import os.path
@@ -16,10 +27,6 @@ def get_version(rel_path):
     else:
         raise RuntimeError("Unable to find version string.")
 
-# README.md
-with open('README.md', 'r', encoding='utf-8') as readme_file:
-    readme = readme_file.read()
-
 setup(
     name='notdb',
     packages=find_packages(),
@@ -28,12 +35,11 @@ setup(
         'bcrypt>=3.2.0'
     ],
     version=get_version('notdb/__init__.py'),
-    description='NotDB is a PYON-like database',
+    description='NotDB PYON-like database',
     author='Nawaf Alqari',
     author_email='nawafalqari13@gmail.com',
     keywords=['notdb', 'db', 'database', 'notdatabsae', 'simple database'],
-    long_description=readme,
-    long_description_content_type='text/markdown',
+    long_description=__doc__,
     entry_points={
         'console_scripts': ['notdb=notdb.__main__:main']
     },
