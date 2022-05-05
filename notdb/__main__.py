@@ -24,12 +24,12 @@ def get_password():
    password = hashpw(getpass('Password: ').encode('utf-8'), gensalt())
    return password
 
-def create_db(name, _password=None):
+def create_db(filename, _password=None):
    schema = {
       '__docs': []
    }
 
-   with open(name, 'w') as file:
+   with open(filename, 'w') as file:
          if not _password:
             file.write(pyonr.dumps(schema))
          else:
@@ -43,22 +43,23 @@ def create_db(name, _password=None):
 def main():
    pass
 
-parser = argparse.ArgumentParser('NotDB', 'notdb [filename]', f'NotDB command line tool v{v}', )
+if __name__ == '__main__':
+   parser = argparse.ArgumentParser('NotDB', 'notdb [filename]', f'NotDB command line tool v{v}', )
 
-parser.add_argument('filename', nargs=1, type=str, help='Create a database with the given filename', metavar='filename')
-parser.add_argument('-p', '--password', action='store_true', help='Secure the database with a password')
-parser.add_argument('-v', '--version', action='version', version=f'notdb {v}', help='Show the notdb_viewer version')
+   parser.add_argument('filename', nargs=1, type=str, help='Create a database with the given filename', metavar='filename')
+   parser.add_argument('-p', '--password', action='store_true', help='Secure the database with a password')
+   parser.add_argument('-v', '--version', action='version', version=f'notdb {v}', help='Show the notdb_viewer version')
 
-args = parser.parse_args()
+   args = parser.parse_args()
 
-if len(args.filename) != 0:
-   filename = args.filename[0]
-   ispassword = args.password
+   if len(args.filename) != 0:
+      filename = args.filename[0]
+      ispassword = args.password
 
-   if os.path.isfile(filename) or os.path.isfile(f'{filename}.ndb'):
-      parser.error(f'{filename}: already exists')
-   else:
-      if not filename.endswith('.ndb'):
-         filename += '.ndb'
+      if os.path.isfile(filename) or os.path.isfile(f'{filename}.ndb'):
+         parser.error(f'{filename}: already exists')
+      else:
+         if not filename.endswith('.ndb'):
+            filename += '.ndb'
 
-      create_db(filename, ispassword)
+         create_db(filename, ispassword)

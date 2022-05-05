@@ -50,7 +50,8 @@ setup(
         'Documentation': 'https://github.com/nawafalqari/NotDB#readme',
         'Bug Tracker': 'https://github.com/nawafalqari/NotDB/issues',
         'Source Code': 'https://github.com/nawafalqari/NotDB/',
-        'Discord': 'https://discord.gg/cpvynqk4XT'
+        'Discord': 'https://discord.gg/cpvynqk4XT',
+        'Donate': 'https://paypal.me/NawafHAlqari'
     },
     classifiers=[
         'Programming Language :: Python :: 3',
