@@ -1,12 +1,17 @@
 import os
 import pyonr
 from bcrypt import checkpw as _checkpw
-from dataclasses import dataclass
+from bcrypt import hashpw as _hashpw
+from bcrypt import gensalt as _gensalt
+from getpass import getpass as _getpass
 
 from .filesHandler import find_ndb_files
 from .errors import *
 from . import UTypes
 
+schema = {
+   '__docs': []
+}
 
 def checkTypes(l:list, type):
    '''
@@ -22,6 +27,29 @@ def checkTypes(l:list, type):
 
 def _getAlgo(documents, _filter):
    return [d for d in documents if sum(1 for k, v in d.items() if _filter.get(k)==v) >= len(_filter)]
+
+def get_password():   
+   password = _hashpw(_getpass('Password: ').encode('utf-8'), _gensalt())
+   return password
+
+def create_db(filename:str, _password=None):
+   schema = {
+      '__docs': []
+   }
+
+   if not filename.endswith('.ndb'):
+      filename += '.ndb'
+
+   with open(filename, 'w') as file:
+         if not _password:
+            file.write(pyonr.dumps(schema))
+         else:
+            try:
+               password = get_password()
+               schema['__password'] = password
+            except KeyboardInterrupt:
+               pass
+            file.write(pyonr.dumps(schema))
 
 class NotDBClient:
    def __init__(self, host=None, password=None):

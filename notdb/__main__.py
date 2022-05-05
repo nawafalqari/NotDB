@@ -1,8 +1,6 @@
 import argparse
 import os
-from getpass import getpass
-from bcrypt import hashpw, gensalt
-import pyonr
+from . import create_db
 
 def read(rel_path):
    import codecs
@@ -20,35 +18,15 @@ def get_version(rel_path):
 
 v = get_version('__init__.py')
 
-def get_password():   
-   password = hashpw(getpass('Password: ').encode('utf-8'), gensalt())
-   return password
-
-def create_db(filename, _password=None):
-   schema = {
-      '__docs': []
-   }
-
-   with open(filename, 'w') as file:
-         if not _password:
-            file.write(pyonr.dumps(schema))
-         else:
-            try:
-               password = get_password()
-               schema['__password'] = password
-            except KeyboardInterrupt:
-               pass
-            file.write(pyonr.dumps(schema))
-
 def main():
    pass
 
-if __name__ == '__main__':
-   parser = argparse.ArgumentParser('NotDB', 'notdb [filename]', f'NotDB command line tool v{v}', )
+if __name__ == '__main__' or __name__ == 'notdb.__main__':
+   parser = argparse.ArgumentParser('NotDB', 'notdb [filename]', f'NotDB command line tool v{v}',)
 
    parser.add_argument('filename', nargs=1, type=str, help='Create a database with the given filename', metavar='filename')
    parser.add_argument('-p', '--password', action='store_true', help='Secure the database with a password')
-   parser.add_argument('-v', '--version', action='version', version=f'notdb {v}', help='Show the notdb_viewer version')
+   parser.add_argument('-v', '--version', action='version', version=f'notdb {v}', help='Show the notdb version')
 
    args = parser.parse_args()
 
