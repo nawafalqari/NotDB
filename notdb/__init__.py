@@ -24,6 +24,6 @@ $ notdb [filename] --password
 from .ndb import NotDBClient, UTypes, create_db, get_password, schema
 from .errors import *
 
-__version__ = '1.1.0b11'
+__version__ = '1.1.0'
 __all__ = ['InvalidDictError', 'InvalidHostError', 'NotDBClient', 'UTypes', 'WrongPasswordError',
             'checkTypes', '__version__']

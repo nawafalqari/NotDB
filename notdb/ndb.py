@@ -126,7 +126,7 @@ class NotDBClient:
 
    @property
    def hostType(self):
-      return self.__type
+      return self.__hostType
 
    # cloud dbs functions
    def __CRead(self):

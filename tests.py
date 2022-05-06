@@ -1,7 +1,4 @@
-from notdb import NotDBClient
+from notdb import NotDBClient, UTypes
 
-db = NotDBClient('http://192.168.1.111:5000/t.ndb')
+db = NotDBClient('https://notdb.nawafhq.repl.co/test.ndb')
 
-print(db.get())
-print(db.get({'online': True}))
-print(db.getOne({'online': True}))
