@@ -1,9 +1,8 @@
 import os
+from bcrypt import (hashpw as _hashpw, checkpw as _checkpw, gensalt as _gensalt)
 import pyonr
-from bcrypt import checkpw as _checkpw
-from bcrypt import hashpw as _hashpw
-from bcrypt import gensalt as _gensalt
 from getpass import getpass as _getpass
+from requests import request as _req
 
 from .filesHandler import find_ndb_files
 from .errors import *
@@ -52,29 +51,51 @@ def create_db(filename:str, _password=None):
             file.write(pyonr.dumps(schema))
 
 class NotDBClient:
-   def __init__(self, host=None, password=None):
+   def __init__(self, host:str=None, password=None):
       if not host:
          self.__host = find_ndb_files('.')
+         self.__hostType = 'local'
          if isinstance(self.__host, list):
             raise InvalidHostError(host)
+      elif host.startswith(('https://', 'http://')):
+         if not host.endswith('.ndb'):
+            raise InvalidHostError(host, 'Invalid host, host example: https://example.com/dbname.ndb')
+         _req('CONNECT', host)
+         self.__host = host
+         self.__hostType = 'cloud'
       else:
          self.__host = host
+         self.__hostType = 'local'
 
-      
-      self.__read = pyonr.Read(self.__host)
       self.__schema = {
          '__docs': []
       }
+      if self.__hostType == 'local':
+         self.__read = pyonr.Read(self.__host)
 
-      if self.__read.readfile == None:
-         self.__read.write(pyonr.dumps(self.__schema))
-      if self.__read.readfile.get('__password'):
-         if not password:
-            password = ''
-         if isinstance(password, str) and not _checkpw(password.encode('utf-8'), self.__read.readfile['__password']):
-            raise WrongPasswordError()
-         elif isinstance(password, bytes) and not _checkpw(password, self.__read.readfile['__password']):
-            raise WrongPasswordError()
+         if self.__read.readfile == None:
+            self.__read.write(pyonr.dumps(self.__schema))
+         if self.__read.readfile.get('__password'):
+            if not password:
+               password = ''
+            if isinstance(password, str) and not _checkpw(password.encode('utf-8'), self.__read.readfile['__password']):
+               raise WrongPasswordError()
+            elif isinstance(password, bytes) and not _checkpw(password, self.__read.readfile['__password']):
+               raise WrongPasswordError()
+
+      elif self.__hostType == 'cloud':
+         # self.__dbdata = pyonr.loads(_req('BRING', self.__host).content.decode('utf-8'))
+
+         if self.__CDBData == None:
+            self.__CWrite(pyonr.dumps(self.__schema))
+            self.__CDBData = self.__CRead()
+         if self.__CDBData.get('__password'):
+            if not password:
+               password = ''
+            if isinstance(password, str) and not _checkpw(password.encode('utf-8'), self.__CDBData.get('__password')):
+               raise WrongPasswordError()
+            elif isinstance(password, bytes) and not _checkpw(password, self.__CDBData('__password')):
+               raise WrongPasswordError()
       
    # file data
    @property
@@ -103,125 +124,286 @@ class NotDBClient:
 
       return len(fdata['__docs'])
 
+   @property
+   def hostType(self):
+      return self.__type
+
+   # cloud dbs functions
+   def __CRead(self):
+      return pyonr.loads(_req('BRING', self.__host).content.decode('utf-8'))
+
+   def __CWrite(self, update:dict):
+      req = _req('UPDATE', self.__host, data={
+         'update': f'{update}'
+      }).content.decode('utf-8')
+
+      if req.startswith('Error'):
+         raise ServerError(req)
+
+   @property
+   def __CDBData(self):
+      return self.__CRead()
+
    # data setters, getters
    
    def get(self, _filter:dict={}):
-      docs = self.__read.readfile['__docs']
+      '''
+      get a list of documents that match `_filter`
+
+      >>> db.get({'online': True})
+      [{'name': 'Nawaf', 'online': True}, {'name': 'Khayal', 'online': True}]
+      '''
+      docs = self.__read.readfile['__docs'] if self.__hostType == 'local' else self.__CDBData['__docs']
       return _getAlgo(docs, _filter)
    
    def getOne(self, _filter:dict={}):
-      _r = self.__read
-      _docs = _r.readfile['__docs']
+      '''
+      get the first document that match `_filter`
+
+      >>> db.get({'online': True})
+      {'name': 'Nawaf', 'online': True}
+      '''
+      # local
+      if self.__hostType == 'local':
+         _r = self.__read
+         _docs = _r.readfile['__docs']
+         if _filter == {}:
+            if len(_docs) == 0:
+               return None
+            return _docs[0]
+
+         f = self.get(_filter)
+         if len(f) == 0:
+            return None
+         return f[0]
+      
+      # Cloud server
+      _docs = self.__CDBData['__docs']
       if _filter == {}:
          if len(_docs) == 0:
             return None
          return _docs[0]
-
-      f = self.get(_filter)
+      
+      f =  self.get(_filter)
       if len(f) == 0:
          return None
-      return self.get(_filter)[0]
+      return f[0]
+      
 
    def appendOne(self, document:dict):
+      '''
+      Append one document to the end of db
+
+      >>> db.appendOne({'name': 'Nawaf'})
+      True
+
+      return True on success
+      '''
       if not isinstance(document, dict):
          raise TypeError('Unexpected document type')
 
-      _r = self.__read
-      _doc = _r.readfile
-      
-      _doc['__docs'].append(document)
-      self.__read.write(_doc)
+      if self.__hostType == 'local': # local db
+         _r = self.__read
+         _dbd = _r.readfile # db data
+         
+         _dbd['__docs'].append(document)
+         self.__read.write(_dbd)
+
+         return True
+      # server db
+      _dbd = self.__CRead() # db data
+
+      _dbd['__docs'].append(document)
+      self.__CWrite(_dbd)
+
+      return True
 
    def appendMany(self, documents:list):
+      '''
+      Append multiple documents to db
+
+      >>> numbers_from_one_to_ten = list(range(1, 11))
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      >>> db.appendMany(number_from_one_to_ten)
+      True
+
+      return True on success
+      '''
       if not isinstance(documents, list):
          raise TypeError(f'Unexpected type: "{type(documents)}"')
       if not checkTypes(documents, dict):
          raise TypeError('Every element in "documents" must be a dict')
 
-      _r = self.__read
-      _fd = _r.readfile
-      _doc = _fd['__docs']
+      if self.__hostType == 'local': # local db
+         _r = self.__read
+         _fd = _r.readfile
+         _docs = _fd['__docs']
+
+         for document in documents:
+            _docs.append(document)
+
+         _r.write(_fd)
+
+         return True
+
+      # server db
+      _fd = self.__CRead()
+      _docs = _fd['__docs']
 
       for document in documents:
-         _doc.append(document)
+         _docs.append(document)
 
-      _r.write(_fd)
+      self.__CWrite(_fd)
+
+      return True
 
    def removeOne(self, _filter:dict):
-      _r = self.__read
-      _fd = _r.readfile
-      _doc = _fd['__docs']
+      '''
+      Remove the first document that match `_filter`
+
+      >>> db.removeOne({'name': 'Nawaf'})
+      True
+
+      return True on success
+      '''
+
+      if self.__hostType == 'local': # local db
+         _r = self.__read
+         _fd = _r.readfile
+         _docs = _fd['__docs']
+         full_doc = self.getOne(_filter)
+
+         if not full_doc:
+            return None
+
+         _docs.remove(full_doc)
+         _r.write(_fd)
+
+         return True
+      
+      _fd = self.__CRead()
+      _docs = _fd['__docs']
       full_doc = self.getOne(_filter)
 
       if not full_doc:
          return None
+      
+      _docs.remove(full_doc)
+      self.__CWRITE(full_doc)
 
-      _doc.remove(full_doc)
-      _r.write(_fd)
+      return True
 
    def removeMany(self, _filter):
-      _r = self.__read
-      _fd = _r.readfile
-      _doc = _fd['__docs']
+      '''
+      Remove multiple documents from db
+
+      >>> db.removeMany('online': True)
+      True
+
+      return True on success
+      '''
+
+      if self.__hostType == 'local': # local db
+         _r = self.__read
+         _fd = _r.readfile
+         _docs = _fd['__docs']
+         all_docs = self.get(_filter)
+
+         if not all_docs:
+            return None
+
+         for document in all_docs:
+            _docs.remove(document)
+
+         _r.write(_fd)
+         
+         return True
+      
+      _fd = self.__CRead()
+      _docs = _fd['__docs']
       all_docs = self.get(_filter)
 
       if not all_docs:
          return None
 
-      for doc in all_docs:
-         _doc.remove(doc)
+      for document in all_docs:
+         _docs.remove(document)
 
-      _r.write(_fd)
+      self.__CWrite(_fd)
+      return True
 
    def updateOne(self, _filter:dict, update:dict, type:str):
-      if type == UTypes.SET: # "SET" an item in a document
-         if len(update) != 1:
-            raise InvalidDictError(update)
-         _fullDoc = self.getOne(_filter)
+      '''
+      Update the first element that matches `_filter`
+
+      >>> db.updateOne(
+            {'name': 'Nawaf'}, # <---- filter
+            {'online': True},  # <---- update (new key),
+            notdb.UTypes.SET   # <---- Update type (SET, UNSET, ...)
+         )
+      True
+
+      return True on success
+      '''
+      _fullDoc = self.getOne(_filter)
+      _r = None
+      _fd = None
+      _docs = None
+      if self.hostType == 'local':
          _r = self.__read
          _fd = _r.readfile
          _docs = _fd['__docs']
+      if self.hostType == 'cloud':
+         _fd = self.__CRead()
+         _docs = _fd['__docs']
+
+      if type == UTypes.SET: # "SET" an item in a document
+         if len(update) != 1:
+            raise InvalidDictError(update)
 
          i = _docs.index(_fullDoc)
          _docs[i].update(update)
 
-         _r.write(_fd)
-         return None
+         if self.hostType == 'local':
+            _r.write(_fd)
+         if self.hostType == 'cloud':
+            self.__CWrite(_fd)
+         return True
 
       if type == UTypes.UNSET: # "UNSET" an item from a document
-         _fullDoc = self.getOne(_filter)
-         _r = self.__read
-         _fd = _r.readfile
-         _docs = _fd['__docs']
-
          i = _docs.index(_fullDoc)
          if isinstance(update, str):
             del _docs[i][update]
-            _r.write(_fd)
+            
+            if self.hostType == 'local':
+               _r.write(_fd)
+            if self.hostType == 'cloud':
+               self.__CWrite(_fd)
          elif isinstance(update, dict):
             if len(update) != 1:
                raise InvalidDictError(update)
             del _docs[i][list(update.keys())[0]]
-            _r.write(_fd)
 
-         return None
+            if self.hostType == 'local':
+               _r.write(_fd)
+            if self.hostType == 'cloud':
+               self.__CWrite(_fd)
+
+         return True
 
       raise TypeError(f'"{type}": Invalid type, expecting "notdb.SET" or "notdb.UNSET"')
 
    def updateMany(self, _filter:dict, update:dict):
       pass
 
-   def getOneAndremove(self, _filter:dict):
-      f = self.get(_filter)
-      self.removeOne(_filter)
-
-      return f
-
-class NotDBCloudClient:
+class NotDBCloudClient(NotDBClient):
    '''
+   **NotDB** Databases On Cloud
 
+   >>> NotDBCloudClient('https://example.com/t.ndb', password=password)
    
+   Full documentation:
+   - [NotDB](https://github.com/nawafalqari/NotDB#readme)
+   - [NotDB Cloud](https://github.com/nawafalqari/NotDB_Cloud#readme)
    '''
-   def __init__(self, host, password=None):
-      pass
-   
+   pass

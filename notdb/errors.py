@@ -21,3 +21,12 @@ class InvalidDictError(Exception):
         super().__init__(self.message)
     def __str__(self):
         return f'"{self.element}": {self.message}'
+
+class ServerError(Exception):
+    def __init__(self, message):
+        message = f'Error from your server: "{message}"'
+        self.message = message
+
+        super().__init__(self.message)
+    def __str__(self):
+        return f'"{self.message}'
