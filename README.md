@@ -125,9 +125,12 @@ db.updateOne({'name': 'Nawaf'}, 'age', notdb.UTypes.UNSET)
 # Since we are unsetting a key we don't need its value
 # That's why we specified "age" for the update not {'age': 15}
 ```
-
+#### POP
 ```python
-db.updateMany() # is still under development
+# let's say this is our document
+# {'name': 'Nawaf', 'skills': {'languages': ['Python', 'JavaScript', 'C']}}
+db.updateOnePOP({'name': 'Nawaf'}, 'skills.languages', -1)
+# -1 will remove the last element
 ```
 
 ## View Your Data
