@@ -6,6 +6,7 @@ from requests import request as _req
 
 from .filesHandler import find_ndb_files
 from .errors import *
+from .popHandler import popDN
 from . import UTypes
 
 schema = {
@@ -51,6 +52,15 @@ def create_db(filename:str, _password=None):
             file.write(pyonr.dumps(schema))
 
 class NotDBClient:
+   '''
+   **NotDB** Databases client
+
+   >>> NotDBClient('test.ndb', password=password)
+   
+   Full documentation:
+   - [NotDB](https://github.com/nawafalqari/NotDB#readme)
+   - [NotDB Cloud](https://github.com/nawafalqari/NotDB_Cloud#readme)
+   '''
    def __init__(self, host:str=None, password=None):
       if not host:
          self.__host = find_ndb_files('.')
@@ -391,10 +401,40 @@ class NotDBClient:
 
          return True
 
-      raise TypeError(f'"{type}": Invalid type, expecting "notdb.SET" or "notdb.UNSET"')
+      raise TypeError(f'"{type}": Invalid type, check dir(notdb.UTypes)')
 
-   def updateMany(self, _filter:dict, update:dict):
-      pass
+   def updateOnePOP(self, _filter:dict, element:str, element_index:int=-1):
+      '''
+      Remove and return a list item at index
+      (This update type is only for pop)
+
+      >>> db.updateOnePOP(
+      {'name': 'Nawaf'},         <-- filter
+      'skills.programmingLangs', <-- path to array (dot notation)
+      0)                         <-- index (default last)
+      '''
+
+      _fullDoc = self.getOne(_filter)
+      _r = None
+      _fd = None
+      _docs = None
+      if self.hostType == 'local':
+         _r = self.__read
+         _fd = _r.readfile
+         _docs = _fd['__docs']
+      if self.hostType == 'cloud':
+         _fd = self.__CRead()
+         _docs = _fd['__docs']
+      i = _docs.index(_fullDoc)
+      
+      poppedItem = popDN(_docs[i], element, element_index)
+
+      if self.hostType == 'local':
+         _r.write(_fd)
+      if self.hostType == 'cloud':
+         self.__CWrite(_fd)
+
+      return poppedItem
 
 class NotDBCloudClient(NotDBClient):
    '''

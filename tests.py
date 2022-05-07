@@ -1,4 +1,6 @@
-from notdb import NotDBClient, UTypes
+import notdb
 
-db = NotDBClient('https://notdb.nawafhq.repl.co/test.ndb')
+db = notdb.NotDBClient('test.ndb')
 
+db.updateOnePOP({'name': 'Nawaf'}, 'skills.langs')
+# print(db.get())
