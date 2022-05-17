@@ -53,15 +53,30 @@ def create_db(filename:str, _password=None):
 
 class NotDBClient:
    '''
-   **NotDB** Databases client
+   NotDB Databases client
 
    >>> NotDBClient('test.ndb', password=password)
    
    Full documentation:
    - [NotDB](https://github.com/nawafalqari/NotDB#readme)
    - [NotDB Cloud](https://github.com/nawafalqari/NotDB_Cloud#readme)
+
+   `Parameters:`
+
+   `host` (optional) database filename/url/ip address,
+   if `None` was given it will scan the directory for one ndb file
+   if there was multiple databases it will raise `InvalidHostError`
+
+   `password` (optional for unsecured DBs) database's password,
+   must be `str` or `bytes`\n
+   raise `WrongPasswordError` if the password was wrong
+
+   `encrypt` (default=False) secure the database even more with
+   `base64` encryption (UNDER DEVELOPMENT)
+
    '''
-   def __init__(self, host:str=None, password=None):
+   def __init__(self, host:str=None, password:str=None, encrypt:bool=False):
+      self.__enc = encrypt
       if not host:
          self.__host = find_ndb_files('.')
          self.__hostType = 'local'
@@ -107,7 +122,7 @@ class NotDBClient:
             elif isinstance(password, bytes) and not _checkpw(password, self.__CDBData('__password')):
                raise WrongPasswordError()
       
-   # file data
+   # database getters
    @property
    def host(self):
       h = self.__host
@@ -138,6 +153,10 @@ class NotDBClient:
    def hostType(self):
       return self.__hostType
 
+   @property
+   def encrypt(self):
+      return self.__enc
+
    # cloud dbs functions
    def __CRead(self):
       return pyonr.loads(_req('BRING', self.__host).content.decode('utf-8'))
@@ -153,6 +172,12 @@ class NotDBClient:
    @property
    def __CDBData(self):
       return self.__CRead()
+
+   def __encrypt(self):
+      '''
+      Encrypt the entire database
+      '''
+      pass
 
    # data setters, getters
    

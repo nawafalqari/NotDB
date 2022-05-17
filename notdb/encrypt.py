@@ -15,5 +15,3 @@ def decode(data):
 
 def handleEncoded(encoded:bytes):
    return loads(decode(encoded).decode('utf-8'))
-
-print(type(handleEncoded(encode({'__docs': [{'name': 'Nawaf'}]}))))
