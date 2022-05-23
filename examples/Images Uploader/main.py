@@ -20,6 +20,14 @@ while True:
          plt.imshow(f)
          plt.show()
 
+      if cmd == 'remove':
+         name = input('name> ').strip()
+
+         f = db.files.removeFile({'name': name})
+
+      if cmd == 'clear':
+         db.files.removeFiles({})
+         
       if cmd == 'help':
          print('''
          
@@ -29,9 +37,6 @@ while True:
          clear: remove every file
          
          ''')
-         
-      if cmd == 'clear':
-         db.files.removeFiles({})
 
    except KeyboardInterrupt:
       exit()
