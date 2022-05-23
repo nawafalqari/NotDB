@@ -326,7 +326,7 @@ class NotDBClient:
          return None
       
       _docs.remove(full_doc)
-      self.__CWRITE(full_doc)
+      self.__CWrite(full_doc)
 
       return True
 
