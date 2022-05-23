@@ -21,9 +21,9 @@ $ notdb [filename] --password
 
 '''
 
-from .ndb import NotDBClient, UTypes, create_db, get_password, schema
+from .ndb import NotDBClient, NotDBCloudClient, UTypes, create_db, get_password, schema
 from .errors import *
 
-__version__ = '1.1.0'
-__all__ = ['InvalidDictError', 'InvalidHostError', 'NotDBClient', 'UTypes', 'WrongPasswordError',
+__version__ = '1.2.0'
+__all__ = ['InvalidDictError', 'InvalidHostError', 'NotDBClient', 'NotDBCloudClient', 'Files', 'UTypes', 'WrongPasswordError',
             'checkTypes', '__version__']

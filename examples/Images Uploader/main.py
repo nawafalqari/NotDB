@@ -19,6 +19,16 @@ while True:
 
          plt.imshow(f)
          plt.show()
+
+      if cmd == 'help':
+         print('''
+         
+         save: save a file
+         show: show a file
+         remove: remove a file
+         clear: remove every file
+         
+         ''')
          
       if cmd == 'clear':
          db.files.removeFiles({})

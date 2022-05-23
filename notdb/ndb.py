@@ -8,6 +8,8 @@ from .filesHandler import find_ndb_files
 from .errors import *
 from .popHandler import popDN
 from . import UTypes
+from .Files import Files
+from .algo import _getAlgo
 
 schema = {
    '__docs': []
@@ -24,9 +26,6 @@ def checkTypes(l:list, type):
    ```
    '''
    return not list(filter(lambda e:not isinstance(e, type), l))
-
-def _getAlgo(documents, _filter):
-   return [d for d in documents if sum(1 for k, v in d.items() if _filter.get(k)==v) >= len(_filter)]
 
 def get_password():   
    password = _hashpw(_getpass('Password: ').encode('utf-8'), _gensalt())
@@ -60,23 +59,30 @@ class NotDBClient:
    Full documentation:
    - [NotDB](https://github.com/nawafalqari/NotDB#readme)
    - [NotDB Cloud](https://github.com/nawafalqari/NotDB_Cloud#readme)
-
-   `Parameters:`
-
-   `host` (optional) database filename/url/ip address,
-   if `None` was given it will scan the directory for one ndb file
-   if there was multiple databases it will raise `InvalidHostError`
-
-   `password` (optional for unsecured DBs) database's password,
-   must be `str` or `bytes`\n
-   raise `WrongPasswordError` if the password was wrong
-
-   `encrypt` (default=False) secure the database even more with
-   `base64` encryption (UNDER DEVELOPMENT)
-
    '''
-   def __init__(self, host:str=None, password:str=None, encrypt:bool=False):
-      self.__enc = encrypt
+   def __init__(
+      self,
+      host:str=None,
+      password:str=None):
+      '''
+      NotDB Databases client
+
+      >>> NotDBClient('test.ndb', password=password)
+      
+      Full documentation:
+      - [NotDB](https://github.com/nawafalqari/NotDB#readme)
+      - [NotDB Cloud](https://github.com/nawafalqari/NotDB_Cloud#readme)
+
+      `Parameters:`
+
+      `host`: (optional) database filename/url/ip address,
+      if `None` was given it will scan the directory for one ndb file
+      if there was multiple databases it will raise `InvalidHostError`
+
+      `password`: (optional for unsecured DBs) database's password,
+      must be `str` or `bytes`\n
+      raise `WrongPasswordError` if the password was wrong
+      '''
       if not host:
          self.__host = find_ndb_files('.')
          self.__hostType = 'local'
@@ -153,9 +159,10 @@ class NotDBClient:
    def hostType(self):
       return self.__hostType
 
+   # Files class
    @property
-   def encrypt(self):
-      return self.__enc
+   def files(self) -> Files:
+      return Files(self, self.__read, self.__CRead, self.__CWrite)
 
    # cloud dbs functions
    def __CRead(self):
@@ -172,12 +179,6 @@ class NotDBClient:
    @property
    def __CDBData(self):
       return self.__CRead()
-
-   def __encrypt(self):
-      '''
-      Encrypt the entire database
-      '''
-      pass
 
    # data setters, getters
    
@@ -242,7 +243,7 @@ class NotDBClient:
          _dbd = _r.readfile # db data
          
          _dbd['__docs'].append(document)
-         self.__read.write(_dbd)
+         _r.write(_dbd)
 
          return True
       # server db
@@ -316,6 +317,7 @@ class NotDBClient:
 
          return True
       
+      # Cloud db
       _fd = self.__CRead()
       _docs = _fd['__docs']
       full_doc = self.getOne(_filter)
@@ -461,9 +463,12 @@ class NotDBClient:
 
       return poppedItem
 
+   def __repr__(self):
+      return f'{self.__class__.__name__}(host="{self.host}")'
+
 class NotDBCloudClient(NotDBClient):
    '''
-   **NotDB** Databases On Cloud
+   NotDB Databases On Cloud
 
    >>> NotDBCloudClient('https://example.com/t.ndb', password=password)
    
