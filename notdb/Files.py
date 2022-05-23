@@ -367,8 +367,7 @@ class Files:
       _r.write(_dbd)
 
    def __make_files_section_server(self):
-      _r = self.read
-      _dbd = _r.readfile
+      _dbd = self.__CRead()
 
       _dbd['__files'] = []
       self.__CWrite(_dbd)
