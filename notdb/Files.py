@@ -119,12 +119,14 @@ class Files:
          return True
 
       # server db
-      _dbd = self.cls.__CRead() # db data
+      _dbd = self.__CRead() # db data
 
       if not _dbd.get('__files'): # if __files doesn't exists in the db
          self.__make_files_section_server() # add __files
 
+      _dbd = self.__CRead() # db data
       _dbd['__files'].append(document)
+      self.__CWrite(_dbd)
 
       return True
       
@@ -369,4 +371,4 @@ class Files:
       _dbd = _r.readfile
 
       _dbd['__files'] = []
-      _r.write(_dbd)
+      self.__CWrite(_dbd)

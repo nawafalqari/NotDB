@@ -162,7 +162,9 @@ class NotDBClient:
    # Files class
    @property
    def files(self) -> Files:
-      return Files(self, self.__read, self.__CRead, self.__CWrite)
+      if self.hostType == 'local':
+         return Files(self, self.__read, self.__CRead, self.__CWrite)
+      return Files(self, None, self.__CRead, self.__CWrite)
 
    # cloud dbs functions
    def __CRead(self):
