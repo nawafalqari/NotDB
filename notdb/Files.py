@@ -91,6 +91,7 @@ class Files:
          document['filename'] = f'{generateCode()}{extension}' # filename.ext "extension variable has a dot at the begining"
       else:
          document['filename'] = filename
+
       with open(fp, 'rb') as f:
          document['data'] = f.read()
 
@@ -129,7 +130,96 @@ class Files:
       self.__CWrite(_dbd)
 
       return True
+
+   def appendFileWerkzeug(self, file, filename:str=None, name:str=None):
+      '''
       
+      Append `werkzeug.datastructures.FileStorage()` to db
+
+      flask example
+      ```py
+      import notdb
+      from flask import Flask, request, render_template
+
+      app = Flask(__name__)
+      db = notdb.NotDBClient('db.ndb')
+
+      @app.route('/', methods=['GET', 'POST'])
+      def index():
+         if request.method == 'POST':
+            file = request.files['file']
+
+            print(file)
+            # <FileStorage: 'filename.png' ('image/png')>
+            print(type(file))
+            # <class 'werkzeug.datastructures.FileStorage'>
+
+            db.files.appendFileWerkzeug(file, file.filename)
+
+         # simple form with file input
+         return render_template('upload_file.html')
+      ```
+      '''
+      try:
+         import werkzeug.datastructures
+      except ModuleNotFoundError:
+         raise ImportError('werkzeug is not installed run (pip install werkzeug)')
+      if not filename and not name: # if filename and name wasn't given
+         raise TypeError('both filename and name are not specified')
+      if (not isinstance(filename, str) and filename != None) or (not isinstance(name, str) and name != None): # if one of the params is not "str"
+         raise TypeError('`filename` and `name` must be `str`')
+      if not isinstance(file, werkzeug.datastructures.FileStorage):
+         raise TypeError('file must be werkzeug.datastructures.FileStorage')
+
+      document = {}
+
+      extension = os.path.splitext(file.filename)[-1]
+
+      if not name:
+         document['name'] = generateCode()
+      else:
+         document['name'] = name
+
+      if not filename:
+         document['filename'] = f'{generateCode()}{extension}'
+      else:
+         document['filename'] = filename
+
+      document['data'] = file.stream.read()
+      document['type'] = extension
+
+      document['mimetype'] = file.mimetype or None
+      
+      file.stream.seek(0, os.SEEK_END)
+      size = file.stream.tell()
+      
+      document['size'] = size
+      document['uploadDate'] = generateTime()
+
+      if self.cls.hostType == 'local': # local db
+         _r = self.read
+         _dbd = _r.readfile # db data
+
+         if not _dbd.get('__files'): # if __files doesn't exists in the db
+            self.__make_files_section() # add __files
+            _dbd = _r.readfile # db data
+
+         _dbd['__files'].append(document)
+         _r.write(_dbd)
+
+         return True
+
+      # server db
+      _dbd = self.__CRead() # db data
+
+      if not _dbd.get('__files'): # if __files doesn't exists in the db
+         self.__make_files_section_server() # add __files
+
+      _dbd = self.__CRead() # db data
+      _dbd['__files'].append(document)
+      self.__CWrite(_dbd)
+
+      return True
       
    # def appendFileBinary(self, binary:bytes):
    #    pass
