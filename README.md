@@ -1,3 +1,8 @@
+# **NotDB is now updated as [SpeedDB](https://github.com/SpeedDB/SpeedDB)**
+
+---
+## old docs:
+
 <p align="center">
    <img src="./images/banner_transparent.png" alt="Logo Transparnet">
 </p>
